@@ -24,7 +24,6 @@ wss.on('connection', function connection(ws, request) {
     if(nameFlag) {
       let currentRoom = BroadCaster.FindUsersRoom(allUsers, ws)  
       let othersInRoom = BroadCaster.FindOthersInRoom(allUsers, currentRoom) 
-      console.log(othersInRoom);
       let parsedMessage = userName + ': ' + message.toString('utf-8');
       BroadCaster.BroadcastMsgInRoom(othersInRoom, parsedMessage)
       console.log(allUsers.length);
@@ -37,8 +36,7 @@ wss.on('connection', function connection(ws, request) {
   });
   
   ws.on('close', ()=> {
-    allUsers = [RemoveFromAllUsers(allUsers, ws)];
-    console.log(allUsers);
+    allUsers = RemoveFromAllUsers(allUsers, ws);
   })
 
 });
