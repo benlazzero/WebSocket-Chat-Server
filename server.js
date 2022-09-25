@@ -4,6 +4,8 @@ const User = require('./user');
 const ParseUserName = require('./parseName');
 const BroadCaster = require('./roomBroadcaster');
 const RemoveFromAllUsers = require('./helpers');
+const validateCommand = require('./commands');
+
 
 
 const server = http.createServer();
@@ -21,15 +23,24 @@ wss.on('connection', function connection(ws, request) {
   ws.send('please enter a username: (3-8 characters)'); 
 
   ws.on('message', (message)=>{
+    const textMessage = message.toString('utf-8');
+
+    if(textMessage[0] == '\\') { 
+      let isCommand = validateCommand(textMessage);
+      if(isCommand) {
+        ws.send('command!')
+      }
+      return;
+    }
+
     if(nameFlag) {
       let currentRoom = BroadCaster.FindUsersRoom(allUsers, ws)  
       let othersInRoom = BroadCaster.FindOthersInRoom(allUsers, currentRoom) 
-      let parsedMessage = userName + ': ' + message.toString('utf-8');
+      let parsedMessage = userName + ': ' + textMessage;
       BroadCaster.BroadcastMsgInRoom(othersInRoom, parsedMessage)
-      console.log(allUsers.length);
     } else {
       // set username with the first message
-      let tempName = message.toString('utf-8');
+      let tempName = textMessage;
       userName = ParseUserName(tempName); 
       nameFlag = true;
     } 
