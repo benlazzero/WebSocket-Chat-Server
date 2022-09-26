@@ -6,7 +6,7 @@ class User {
   } 
   
   setRoom(message) {
-    const roomName = message.slice(4);
+    const roomName = message.slice(3);
     this.room = roomName;
   }
   

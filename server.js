@@ -4,9 +4,7 @@ const User = require('./user');
 const ParseUserName = require('./parseName');
 const BroadCaster = require('./roomBroadcaster');
 const RemoveFromAllUsers = require('./helpers');
-const validateCommand = require('./commands');
-
-
+const command = require('./commands');
 
 const server = http.createServer();
 const wss = new WebSocket.Server({ noServer: true, clientTracking: true });
@@ -26,9 +24,18 @@ wss.on('connection', function connection(ws, request) {
     const textMessage = message.toString('utf-8');
 
     if(textMessage[0] == '\\') { 
-      let isCommand = validateCommand(textMessage);
-      if(isCommand) {
-        ws.send('command!')
+      let isCommand = command.validateCommand(textMessage);
+      if(isCommand && textMessage[1] == 'r') {
+        let updatedUsersArray = command.updateUserRoom(textMessage, allUsers, ws);
+        allUsers = updatedUsersArray;
+        ws.send('room updated');
+      } else if(isCommand && textMessage[1] == 'l') {
+        const allRooms = command.makeRoomList(allUsers); 
+        ws.send(allRooms); 
+      } else if(isCommand && textMessage[1] == 'q') {
+        let updatedUsersArray = command.updateUserRoom('\\r null', allUsers, ws);
+        allUsers = updatedUsersArray;
+        ws.send('left room');
       }
       return;
     }
