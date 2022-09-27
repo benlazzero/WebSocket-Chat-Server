@@ -1,50 +1,47 @@
 const http = require('http');
 const WebSocket = require('ws');
 const User = require('./user');
+const RoomManager = require('./roomManager');
 const ParseUserName = require('./parseName');
-const BroadCaster = require('./roomBroadcaster');
-const RemoveFromAllUsers = require('./helpers');
 const command = require('./commands');
 
 const server = http.createServer();
 const wss = new WebSocket.Server({ noServer: true, clientTracking: true });
 
-let allUsers = [];
+let allUsers = new RoomManager();
 
 wss.on('connection', function connection(ws, request) {
-  let chatUser = new User(ws, wss.clients.size, 'null')
+  let chatUser = new User(ws, wss.clients.size, 'noroom')
   let userName = '';
   let nameFlag = false;
 
-  allUsers.push(chatUser);
-  
   ws.send('please enter a username: (3-8 characters)'); 
 
   ws.on('message', (message)=>{
     const textMessage = message.toString('utf-8');
 
     if(textMessage[0] == '\\') { 
+      console.log(allUsers.allRooms);
       let isCommand = command.validateCommand(textMessage);
       if(isCommand && textMessage[1] == 'r') {
-        let updatedUsersArray = command.updateUserRoom(textMessage, allUsers, ws);
-        allUsers = updatedUsersArray;
+        allUsers.remove(chatUser);
+        chatUser.setRoom(textMessage);
+        console.log(chatUser.getRoom());
+        allUsers.insert(chatUser);
         ws.send('room updated');
       } else if(isCommand && textMessage[1] == 'l') {
-        const allRooms = command.makeRoomList(allUsers); 
-        ws.send(allRooms); 
+        ws.send('make method'); 
       } else if(isCommand && textMessage[1] == 'q') {
-        let updatedUsersArray = command.updateUserRoom('\\r null', allUsers, ws);
-        allUsers = updatedUsersArray;
+        chatUser.setRoom('null');
+        allUsers.remove(chatUser);
         ws.send('left room');
       }
       return;
     }
 
     if(nameFlag) {
-      let currentRoom = BroadCaster.FindUsersRoom(allUsers, ws)  
-      let othersInRoom = BroadCaster.FindOthersInRoom(allUsers, currentRoom) 
-      let parsedMessage = userName + ': ' + textMessage;
-      BroadCaster.BroadcastMsgInRoom(othersInRoom, parsedMessage)
+      allUsers.broadcast(textMessage, chatUser.getRoom(), userName);
+      console.log(allUsers.allRooms);
     } else {
       // set username with the first message
       let tempName = textMessage;
@@ -54,7 +51,7 @@ wss.on('connection', function connection(ws, request) {
   });
   
   ws.on('close', ()=> {
-    allUsers = RemoveFromAllUsers(allUsers, ws);
+    allUsers.remove(chatUser);
   })
 
 });
