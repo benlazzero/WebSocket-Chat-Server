@@ -11,7 +11,7 @@ const wss = new WebSocket.Server({ noServer: true, clientTracking: true });
 let allUsers = new RoomManager();
 
 wss.on('connection', function connection(ws, request) {
-  let chatUser = new User(ws, wss.clients.size, 'noroom')
+  let chatUser = new User(ws, 'noroom')
   let userName = '';
   let nameFlag = false;
 
@@ -26,15 +26,15 @@ wss.on('connection', function connection(ws, request) {
       if(isCommand && textMessage[1] == 'r') {
         allUsers.remove(chatUser);
         chatUser.setRoom(textMessage);
-        console.log(chatUser.getRoom());
         allUsers.insert(chatUser);
         ws.send('room updated');
       } else if(isCommand && textMessage[1] == 'l') {
-        ws.send('make method'); 
+        ws.send('rooms: \n'); 
+        allUsers.list(chatUser);
       } else if(isCommand && textMessage[1] == 'q') {
-        chatUser.setRoom('null');
+        chatUser.setRoom('');
         allUsers.remove(chatUser);
-        ws.send('left room');
+        ws.send(userName + ' left room');
       }
       return;
     }

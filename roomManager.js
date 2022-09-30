@@ -41,11 +41,22 @@ class RoomManager {
           }
           return;
         }
-        console.log('looking at i: ' + i + ' j: ' + j)
       })
     })
   }
   
+  list(user) {
+    let currentRoom = '';
+    this.allRooms.map((roomRow, i)=>{
+      roomRow.map((room, j)=>{
+        if(room.getRoom() == currentRoom) {
+          return;
+        }
+        user.socket.send(room.getRoom() + '(' + roomRow.length + ')');
+        currentRoom = room.getRoom();
+      })
+    })
+  }
 }
 
 module.exports = RoomManager;
