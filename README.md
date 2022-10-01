@@ -4,7 +4,7 @@
 
 The server is using a 2d matrix to handle rooms and the users in each. This can be seen as a class variable in roomManager.js.
 I had seen other implementations for rooms such as adding the room to the user object, but this created headaches for handling 
-simple methods like broadcast or leave-room. All client-server interaction is handled by parsing client messages over the tcp socket. 
+simple methods like broadcast or leave-room. All client-server interaction is handled by parsing client messages over the connection. 
 
 Server features:
 1. username created upon connection (bounds enforced: no whitespace, > 3 chars, < 8 chars)
