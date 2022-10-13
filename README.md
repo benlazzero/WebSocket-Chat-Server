@@ -1,6 +1,6 @@
 # Nodejs WebSocket chatrooms server using 'ws'
 
-## 'Simple' handshake and everyone get's upgraded!
+## 'Not so simple' handshake and everyone get's upgraded!
 
 The server is using a 2d matrix to handle rooms and the users in each. This can be seen as a class variable in roomManager.js.
 I had seen other implementations for rooms such as adding the room to the user object, but this created headaches for handling 
